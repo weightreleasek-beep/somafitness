@@ -124,6 +124,9 @@ def generate_confirmation_code() -> str:
 
 @app.get("/")
 def root():
+    index = os.path.join(STATIC_DIR, "index.html")
+    if os.path.isfile(index):
+        return FileResponse(index)
     return {"message": "SOMA Fitness Studio API"}
 
 @app.post("/api/contact")
