@@ -593,15 +593,29 @@ def admin_get_me(admin: AdminUser = Depends(get_current_admin)):
 # Serve React Frontend (production)
 # =============================================
 
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
-if os.path.isdir(STATIC_DIR):
-    app.mount("/static", StaticFiles(directory=os.path.join(STATIC_DIR, "static")), name="react-static")
 
-    @app.get("/{full_path:path}")
-    def serve_react(full_path: str):
-        """Serve React app for all non-API routes."""
-        file_path = os.path.join(STATIC_DIR, full_path)
-        if full_path and os.path.isfile(file_path):
-            return FileResponse(file_path)
-        return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+@app.on_event("startup")
+def mount_frontend():
+    """Mount React static files if build exists."""
+    static_inner = os.path.join(STATIC_DIR, "static")
+    if os.path.isdir(static_inner):
+        app.mount("/static", StaticFiles(directory=static_inner), name="react-static")
+        print(f"Frontend mounted from {STATIC_DIR}")
+    else:
+        print(f"No frontend build found at {STATIC_DIR}")
+
+
+@app.get("/{full_path:path}")
+def serve_react(full_path: str):
+    """Serve React app for all non-API routes."""
+    if not os.path.isdir(STATIC_DIR):
+        return {"message": "SOMA Fitness Studio API"}
+    file_path = os.path.join(STATIC_DIR, full_path)
+    if full_path and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    index = os.path.join(STATIC_DIR, "index.html")
+    if os.path.isfile(index):
+        return FileResponse(index)
+    return {"message": "SOMA Fitness Studio API"}
