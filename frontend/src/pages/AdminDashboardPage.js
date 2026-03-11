@@ -595,7 +595,7 @@ function CreateSessionForm({ authFetch, onCreated }) {
           <label>Θέσεις</label>
           <input
             type="number" min="1" max="50" required
-            value={form.max_seats} onChange={(e) => setForm({ ...form, max_seats: parseInt(e.target.value) || 1 })}
+            value={form.max_seats} onChange={(e) => setForm({ ...form, max_seats: e.target.value === '' ? '' : parseInt(e.target.value) })}
           />
         </div>
       </div>
