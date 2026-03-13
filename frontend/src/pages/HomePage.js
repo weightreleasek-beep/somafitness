@@ -33,7 +33,7 @@ function HomePage() {
               </div>
               <div className="preview-card-content">
                 <h3>Pilates & Αποκατάσταση</h3>
-                <p>Εξειδικευμένα προγράμματα Reformer & Mat με επιστημονική τεκμηρίωση.</p>
+                <p>Εξειδικευμένα προγράμματα Reformer με επιστημονική τεκμηρίωση.</p>
                 <span className="preview-card-link">Μάθετε περισσότερα &rarr;</span>
               </div>
             </Link>

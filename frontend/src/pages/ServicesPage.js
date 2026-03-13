@@ -24,10 +24,10 @@ function ServicesPage() {
                   <circle cx="32" cy="24" r="6" stroke="currentColor" strokeWidth="2"/>
                 </svg>
               </div>
-              <h3>Pilates Reformer & Mat</h3>
+              <h3>Pilates Reformer</h3>
               <p>
                 Εστίαση στην ορθοσωμία και τον έλεγχο κίνησης.
-                Εξατομικευμένα προγράμματα σε reformer και mat για
+                Εξατομικευμένα προγράμματα σε reformer για
                 βελτίωση της στάσης, ευλυγισίας και δύναμης.
               </p>
             </div>

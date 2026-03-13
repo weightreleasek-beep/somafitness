@@ -123,7 +123,6 @@ function ContactPage() {
                 <select id="service" name="service" value={form.service} onChange={handleChange}>
                   <option value="">Επιλέξτε υπηρεσία</option>
                   <option value="pilates-reformer">Pilates Reformer</option>
-                  <option value="pilates-mat">Pilates Mat</option>
                   <option value="personal-training">Personal Training</option>
                   <option value="semi-personal">Semi-Personal Training</option>
                   <option value="injury-management">Διαχείριση Τραυματισμών</option>

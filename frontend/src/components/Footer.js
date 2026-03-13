@@ -15,7 +15,7 @@ function Footer() {
           <div className="footer-links">
             <h4>Υπηρεσίες</h4>
             <ul>
-              <li><Link to="/pilates">Pilates Reformer & Mat</Link></li>
+              <li><Link to="/pilates">Pilates Reformer</Link></li>
               <li><Link to="/pilates">Διαχείριση Τραυματισμών</Link></li>
               <li><Link to="/training">Personal Training</Link></li>
               <li><Link to="/nutrition">Αθλητική Διατροφή</Link></li>
