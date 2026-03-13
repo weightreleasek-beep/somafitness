@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:8001';
+const API_URL = process.env.REACT_APP_API_URL || '';
 
 function BookingPage() {
   const [sessions, setSessions] = useState([]);
