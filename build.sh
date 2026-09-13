@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit
 
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=460}"
+
 # Install Node.js if not available
 if ! command -v node &> /dev/null; then
     echo "Installing Node.js..."
@@ -16,6 +18,11 @@ if ! command -v node &> /dev/null; then
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     nvm install 20
     nvm use 20
+fi
+
+if ! command -v node &> /dev/null; then
+    echo "Node.js is required to build the frontend but was not found."
+    exit 1
 fi
 
 echo "Node version: $(node --version)"

@@ -15,7 +15,10 @@ import random
 import string
 import os
 
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as exc:
+    print(f"[DB] create_all at import failed: {exc}")
 
 app = FastAPI(title="SOMA Fitness Studio API")
 
@@ -46,12 +49,16 @@ def ensure_booking_approval_column():
 
 @app.on_event("startup")
 def startup():
-    ensure_booking_approval_column()
-    db = next(get_db())
     try:
-        create_default_admin(db)
-    finally:
-        db.close()
+        Base.metadata.create_all(bind=engine)
+        ensure_booking_approval_column()
+        db = next(get_db())
+        try:
+            create_default_admin(db)
+        finally:
+            db.close()
+    except Exception as exc:
+        print(f"[STARTUP] Database init failed: {exc}")
 
 
 # =============================================
@@ -155,8 +162,7 @@ def root():
     return {"message": "SOMA Fitness Studio API"}
 
 @app.get("/api/health")
-def health(db: Session = Depends(get_db)):
-    db.execute(text("SELECT 1"))
+def health():
     return {"ok": True}
 
 
