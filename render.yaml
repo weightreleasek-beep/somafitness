@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: soma-fitness
+    runtime: python
+    plan: starter
+    region: frankfurt
+    buildCommand: bash ./build.sh
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    disk:
+      name: soma-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////data/soma.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: NODE_VERSION
+        value: "20"
