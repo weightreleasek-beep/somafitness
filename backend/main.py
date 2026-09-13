@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect, text
 from pydantic import BaseModel
 from database import engine, get_db, Base
-from models import ContactInquiry, NewsletterSubscription, ClassSession, Booking, AdminUser
+from models import ContactInquiry, NewsletterSubscription, ClassSession, Booking, AdminUser, occupies_seat
 from auth import hash_password, verify_password, create_access_token, get_current_admin, get_current_admin_only, create_default_admin
-from email_service import send_booking_confirmation
+from email_service import send_booking_confirmation, send_booking_pending, send_booking_rejected
 from typing import Optional
 from datetime import date, time, timedelta
 import random
@@ -27,8 +28,25 @@ app.add_middleware(
 )
 
 
+def ensure_booking_approval_column():
+    """Add approval_status to existing databases. Existing bookings become approved."""
+    inspector = inspect(engine)
+    if "bookings" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("bookings")}
+    if "approval_status" in columns:
+        return
+    with engine.begin() as conn:
+        conn.execute(text(
+            "ALTER TABLE bookings ADD COLUMN approval_status VARCHAR(20) DEFAULT 'pending'"
+        ))
+        conn.execute(text("UPDATE bookings SET approval_status = 'approved'"))
+    print("Added bookings.approval_status (existing rows set to approved)")
+
+
 @app.on_event("startup")
 def startup():
+    ensure_booking_approval_column()
     db = next(get_db())
     try:
         create_default_admin(db)
@@ -118,6 +136,13 @@ def generate_confirmation_code() -> str:
     return ''.join(random.choices(string.digits, k=4))
 
 
+def session_datetime(session: ClassSession) -> tuple[str, str]:
+    return (
+        session.date.strftime("%d/%m/%Y"),
+        f"{session.start_time.strftime('%H:%M')} - {session.end_time.strftime('%H:%M')}",
+    )
+
+
 # =============================================
 # Public — Contact & Newsletter
 # =============================================
@@ -128,6 +153,12 @@ def root():
     if os.path.isfile(index):
         return FileResponse(index)
     return {"message": "SOMA Fitness Studio API"}
+
+@app.get("/api/health")
+def health(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"ok": True}
+
 
 @app.post("/api/contact")
 def submit_contact(data: ContactRequest, db: Session = Depends(get_db)):
@@ -175,7 +206,7 @@ def get_available_sessions(
 
     result = []
     for s in sessions:
-        booked = len([b for b in s.bookings if not b.is_cancelled])
+        booked = len([b for b in s.bookings if occupies_seat(b)])
         result.append({
             "id": s.id,
             "session_type": s.session_type,
@@ -199,7 +230,7 @@ def create_booking(data: BookingRequest, db: Session = Depends(get_db)):
     if not session.is_active:
         raise HTTPException(status_code=400, detail="Το μάθημα δεν είναι διαθέσιμο.")
 
-    booked = len([b for b in session.bookings if not b.is_cancelled])
+    booked = len([b for b in session.bookings if occupies_seat(b)])
     if booked >= session.max_seats:
         raise HTTPException(status_code=400, detail="Δεν υπάρχουν διαθέσιμες θέσεις.")
 
@@ -208,6 +239,7 @@ def create_booking(data: BookingRequest, db: Session = Depends(get_db)):
         Booking.session_id == data.session_id,
         Booking.email == data.email,
         Booking.is_cancelled == False,
+        Booking.approval_status != "rejected",
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Έχετε ήδη κράτηση σε αυτό το μάθημα.")
@@ -219,6 +251,7 @@ def create_booking(data: BookingRequest, db: Session = Depends(get_db)):
         .filter(
             Booking.email == data.email,
             Booking.is_cancelled == False,
+            Booking.approval_status != "rejected",
             ClassSession.date == session.date,
             ClassSession.start_time < session.end_time,
             ClassSession.end_time > session.start_time,
@@ -239,31 +272,31 @@ def create_booking(data: BookingRequest, db: Session = Depends(get_db)):
         email=data.email,
         phone=data.phone,
         confirmation_code=code,
+        approval_status="pending",
     )
     db.add(booking)
     db.commit()
     db.refresh(booking)
 
-    # Send confirmation email
-    send_booking_confirmation(
+    session_date, session_time = session_datetime(session)
+    send_booking_pending(
         to_email=data.email,
         name=data.name,
-        confirmation_code=code,
         session_title=session.title,
-        session_date=session.date.strftime("%d/%m/%Y"),
-        session_time=f"{session.start_time.strftime('%H:%M')} - {session.end_time.strftime('%H:%M')}",
+        session_date=session_date,
+        session_time=session_time,
     )
 
     return {
         "success": True,
-        "message": "Η κράτησή σας ολοκληρώθηκε!",
-        "confirmation_code": code,
+        "message": "Το αίτημα κράτησής σας στάλθηκε! Θα ενημερωθείτε με email μετά την αποδοχή.",
+        "status": "pending",
         "booking": {
             "id": booking.id,
             "name": booking.name,
             "session_title": session.title,
             "date": session.date.isoformat(),
-            "time": f"{session.start_time.strftime('%H:%M')} - {session.end_time.strftime('%H:%M')}",
+            "time": session_time,
         },
     }
 
@@ -298,7 +331,8 @@ def admin_get_sessions(
     sessions = db.query(ClassSession).order_by(ClassSession.date.desc(), ClassSession.start_time).all()
     result = []
     for s in sessions:
-        active_bookings = [b for b in s.bookings if not b.is_cancelled]
+        active_bookings = [b for b in s.bookings if occupies_seat(b)]
+        pending = [b for b in active_bookings if b.approval_status == "pending"]
         result.append({
             "id": s.id,
             "session_type": s.session_type,
@@ -308,6 +342,7 @@ def admin_get_sessions(
             "end_time": s.end_time.strftime("%H:%M"),
             "max_seats": s.max_seats,
             "booked_seats": len(active_bookings),
+            "pending_count": len(pending),
             "confirmed_count": len([b for b in active_bookings if b.is_confirmed_attendance]),
             "is_active": s.is_active,
         })
@@ -413,6 +448,8 @@ def admin_get_bookings(
         raise HTTPException(status_code=404, detail="Session not found")
 
     bookings = [b for b in session.bookings if not b.is_cancelled]
+    status_order = {"pending": 0, "approved": 1, "rejected": 2}
+    bookings.sort(key=lambda b: status_order.get(b.approval_status or "pending", 1))
     return {
         "session": {
             "id": session.id,
@@ -429,6 +466,7 @@ def admin_get_bookings(
                 "email": b.email,
                 "phone": b.phone,
                 "confirmation_code": b.confirmation_code,
+                "approval_status": b.approval_status or "pending",
                 "is_confirmed_attendance": b.is_confirmed_attendance,
                 "created_at": b.created_at.isoformat() if b.created_at else None,
             }
@@ -457,6 +495,9 @@ def admin_confirm_attendance(
     if not booking:
         raise HTTPException(status_code=404, detail="Η κράτηση δεν βρέθηκε.")
 
+    if booking.approval_status != "approved":
+        raise HTTPException(status_code=400, detail="Η κράτηση δεν έχει γίνει αποδεκτή ακόμα.")
+
     booking.is_confirmed_attendance = True
     db.commit()
     return {"success": True, "message": f"Επιβεβαιώθηκε η παρουσία: {booking.name}"}
@@ -472,9 +513,72 @@ def admin_toggle_attendance(
     booking = db.query(Booking).filter(Booking.id == booking_id).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
+    if booking.approval_status != "approved":
+        raise HTTPException(status_code=400, detail="Η κράτηση δεν έχει γίνει αποδεκτή ακόμα.")
     booking.is_confirmed_attendance = not booking.is_confirmed_attendance
     db.commit()
     return {"success": True, "confirmed": booking.is_confirmed_attendance}
+
+
+@app.post("/api/admin/bookings/{booking_id}/approve")
+def admin_approve_booking(
+    booking_id: int,
+    admin: AdminUser = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking or booking.is_cancelled:
+        raise HTTPException(status_code=404, detail="Η κράτηση δεν βρέθηκε.")
+    if booking.approval_status == "approved":
+        return {"success": True, "message": f"Ήδη αποδεκτή: {booking.name}"}
+
+    session = booking.session
+    if booking.approval_status == "rejected":
+        occupied = len([b for b in session.bookings if occupies_seat(b)])
+        if occupied >= session.max_seats:
+            raise HTTPException(status_code=400, detail="Δεν υπάρχουν διαθέσιμες θέσεις.")
+
+    booking.approval_status = "approved"
+    db.commit()
+
+    session_date, session_time = session_datetime(session)
+    send_booking_confirmation(
+        to_email=booking.email,
+        name=booking.name,
+        confirmation_code=booking.confirmation_code,
+        session_title=session.title,
+        session_date=session_date,
+        session_time=session_time,
+    )
+    return {"success": True, "message": f"Αποδοχή: {booking.name}"}
+
+
+@app.post("/api/admin/bookings/{booking_id}/reject")
+def admin_reject_booking(
+    booking_id: int,
+    admin: AdminUser = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking or booking.is_cancelled:
+        raise HTTPException(status_code=404, detail="Η κράτηση δεν βρέθηκε.")
+    if booking.approval_status == "rejected":
+        return {"success": True, "message": f"Ήδη απορρίφθηκε: {booking.name}"}
+
+    session = booking.session
+    booking.approval_status = "rejected"
+    booking.is_confirmed_attendance = False
+    db.commit()
+
+    session_date, session_time = session_datetime(session)
+    send_booking_rejected(
+        to_email=booking.email,
+        name=booking.name,
+        session_title=session.title,
+        session_date=session_date,
+        session_time=session_time,
+    )
+    return {"success": True, "message": f"Απόρριψη: {booking.name}"}
 
 
 @app.get("/api/admin/contacts")

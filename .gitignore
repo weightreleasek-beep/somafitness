@@ -1,6 +1,7 @@
 # Python
 backend/venv/
 backend/__pycache__/
+backend/soma_local.db
 backend/*.pyc
 *.pyc
 __pycache__/

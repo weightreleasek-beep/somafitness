@@ -1562,6 +1562,16 @@ a.btn {
   margin-top: 4px;
 }
 
+.booking-approval-hint {
+  font-size: 0.85rem;
+  color: #6b6b6b;
+  background: #f7f3f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
 .booking-form-placeholder {
   background: #f7f3f0;
   padding: 60px 32px;
@@ -1641,6 +1651,24 @@ a.btn {
   font-size: 0.88rem;
   color: #6b6b6b;
   margin-bottom: 32px;
+}
+
+.pending-approval-note {
+  background: #f7f3f0;
+  padding: 28px 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.pending-approval-note p {
+  margin: 0;
+  color: #2a2a2a;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.pending-approval-note .success-email-note {
+  margin: 10px 0 0;
 }
 
 /* ========================================
@@ -1973,6 +2001,17 @@ a.btn {
   font-size: 0.82rem;
   color: #6b6b6b;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-pending-badge {
+  background: #c4866e;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .admin-session-bar {
@@ -2034,6 +2073,16 @@ a.btn {
   margin-bottom: 24px;
 }
 
+.admin-bookings-hint {
+  font-size: 0.85rem;
+  color: #9a5b38;
+  background: #fff8f0;
+  border: 1px solid #f0d9c4;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: -8px 0 20px;
+}
+
 .admin-bookings-placeholder {
   display: flex;
   align-items: center;
@@ -2062,6 +2111,74 @@ a.btn {
 .admin-booking-row.confirmed {
   background: #f0f9f0;
   border-color: #c8e6c9;
+}
+
+.admin-booking-row.pending {
+  background: #fff8f0;
+  border-color: #f0d9c4;
+}
+
+.admin-booking-row.rejected {
+  background: #fafafa;
+  border-color: #eee;
+  opacity: 0.78;
+}
+
+.approval-status-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.approval-status-badge.pending {
+  background: #fff3e8;
+  color: #9a5b38;
+}
+
+.approval-status-badge.rejected {
+  background: #fdecea;
+  color: #c62828;
+}
+
+.booking-approval-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.approval-btn {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+
+.approval-btn.accept {
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #fff;
+}
+
+.approval-btn.accept:hover {
+  background: #256628;
+  border-color: #256628;
+}
+
+.approval-btn.reject {
+  background: #fff;
+  border-color: #c62828;
+  color: #c62828;
+}
+
+.approval-btn.reject:hover {
+  background: #c62828;
+  color: #fff;
 }
 
 .attendance-check {
@@ -2497,6 +2614,15 @@ a.btn {
     flex-wrap: wrap;
     gap: 10px;
     padding: 12px;
+  }
+
+  .booking-approval-actions {
+    width: 100%;
+  }
+
+  .approval-btn {
+    flex: 1;
+    min-height: 40px;
   }
 
   .booking-code {

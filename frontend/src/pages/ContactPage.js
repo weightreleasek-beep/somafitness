@@ -80,7 +80,7 @@ function ContactPage() {
                 </div>
               </div>
               <div className="contact-image">
-                <img src="/images/studio-1.png" alt="SOMA Fitness Studio εξωτερικός χώρος" />
+                <img src="/images/studio-pilates-wide.png" alt="SOMA Fitness Studio" />
               </div>
             </div>
             <form className="contact-form" onSubmit={handleSubmit}>

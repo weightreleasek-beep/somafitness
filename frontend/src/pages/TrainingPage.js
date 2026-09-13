@@ -17,8 +17,8 @@ function TrainingPage() {
         <div className="container">
           <div className="training-layout">
             <div className="training-images">
-              <img src="/images/studio-5.png" alt="Weight training equipment at SOMA" className="training-img-main" />
-              <img src="/images/studio-6.png" alt="SOMA studio overview" className="training-img-secondary" />
+              <img src="/images/studio-gym.png" alt="Χώρος ενδυνάμωσης στο SOMA" className="training-img-main" />
+              <img src="/images/studio-pilates-wide.png" alt="SOMA studio overview" className="training-img-secondary" />
             </div>
             <div className="training-content">
               <div className="training-items">
@@ -63,8 +63,8 @@ function TrainingPage() {
       <section className="section page-gallery-section">
         <div className="container">
           <div className="page-gallery">
-            <img src="/images/studio-7.png" alt="SOMA εξοπλισμός" />
-            <img src="/images/studio-4.png" alt="SOMA χώρος" />
+            <img src="/images/studio-gym.png" alt="SOMA εξοπλισμός ενδυνάμωσης" />
+            <img src="/images/studio-pilates-tower.png" alt="SOMA χώρος Pilates" />
           </div>
         </div>
       </section>

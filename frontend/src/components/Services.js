@@ -53,7 +53,7 @@ function Services() {
           </div>
         </div>
         <div className="services-image">
-          <img src="/images/studio-3.png" alt="Pilates Reformer στο SOMA studio" />
+          <img src="/images/studio-pilates-wide.png" alt="Pilates Reformer στο SOMA studio" />
         </div>
       </div>
     </section>

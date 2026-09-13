@@ -95,22 +95,17 @@ function BookingPage() {
                   <path d="M20 32l8 8 16-16" stroke="#c4866e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h2>Η κράτησή σας ολοκληρώθηκε!</h2>
+              <h2>Το αίτημά σας στάλθηκε!</h2>
               <p className="success-session">{bookingResult.booking.session_title}</p>
               <p className="success-datetime">
                 {formatDate(bookingResult.booking.date)} | {bookingResult.booking.time}
               </p>
-              <div className="confirmation-code-display">
-                <p>Κωδικός Επιβεβαίωσης</p>
-                <div className="code-digits">
-                  {bookingResult.confirmation_code.split('').map((d, i) => (
-                    <span key={i} className="code-digit">{d}</span>
-                  ))}
-                </div>
+              <div className="pending-approval-note">
+                <p>Η κράτηση θα οριστικοποιηθεί μετά την αποδοχή από τη γυμνάστρια.</p>
+                <p className="success-email-note">
+                  Θα ενημερωθείτε με email για την αποδοχή ή την απόρριψη.
+                </p>
               </div>
-              <p className="success-email-note">
-                Ένα email επιβεβαίωσης στάλθηκε στο email σας.
-              </p>
               <button className="btn btn-primary" onClick={() => setBookingResult(null)}>
                 Νέα Κράτηση
               </button>
@@ -127,7 +122,7 @@ function BookingPage() {
         <div className="page-hero-overlay"></div>
         <div className="page-hero-content">
           <h1>Κλείστε Ραντεβού</h1>
-          <p>Επιλέξτε μάθημα και ώρα — δείτε τις διαθέσιμες θέσεις σε πραγματικό χρόνο</p>
+          <p>Επιλέξτε μάθημα και ώρα — κάθε κράτηση εγκρίνεται από τη γυμνάστρια</p>
         </div>
       </section>
 
@@ -210,6 +205,9 @@ function BookingPage() {
                     </p>
                     <p className="selected-seats">{selectedSession.available_seats} θέσεις διαθέσιμες</p>
                   </div>
+                  <p className="booking-approval-hint">
+                    Η κράτηση οριστικοποιείται μετά την αποδοχή, ώστε κάθε τμήμα να έχει το κατάλληλο επίπεδο.
+                  </p>
                   <div className="form-group">
                     <label htmlFor="book-name">Ονοματεπώνυμο *</label>
                     <input
@@ -233,7 +231,7 @@ function BookingPage() {
                   </div>
                   {error && <div className="form-status error">{error}</div>}
                   <button type="submit" className="btn btn-primary btn-full" disabled={bookingLoading}>
-                    {bookingLoading ? 'Κράτηση...' : 'Επιβεβαίωση Κράτησης'}
+                    {bookingLoading ? 'Αποστολή...' : 'Υποβολή Αιτήματος'}
                   </button>
                 </form>
               ) : (

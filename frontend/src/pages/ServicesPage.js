@@ -66,8 +66,8 @@ function ServicesPage() {
       <section className="section page-gallery-section">
         <div className="container">
           <div className="page-gallery">
-            <img src="/images/studio-3.png" alt="Pilates Reformer στο SOMA studio" />
-            <img src="/images/studio-8.png" alt="SOMA εξοπλισμός Pilates" />
+            <img src="/images/studio-pilates-wide.png" alt="Pilates Reformer στο SOMA studio" />
+            <img src="/images/studio-pilates-tower.png" alt="SOMA εξοπλισμός Pilates" />
           </div>
         </div>
       </section>

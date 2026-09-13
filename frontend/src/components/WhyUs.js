@@ -50,8 +50,8 @@ function WhyUs() {
           </div>
         </div>
         <div className="studio-gallery">
-          <img src="/images/studio-4.png" alt="SOMA studio χώρος" />
-          <img src="/images/studio-8.png" alt="SOMA studio εξοπλισμός" />
+          <img src="/images/studio-pilates-wide.png" alt="SOMA studio χώρος" />
+          <img src="/images/studio-pilates-tower.png" alt="SOMA studio εξοπλισμός" />
         </div>
       </div>
     </section>

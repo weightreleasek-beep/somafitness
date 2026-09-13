@@ -1,21 +1,19 @@
-databases:
-  - name: soma-db
-    plan: free
-    databaseName: soma_db
-    user: soma_user
-
 services:
   - type: web
     name: soma-fitness
     runtime: python
-    plan: free
-    buildCommand: ./build.sh
+    plan: starter
+    region: frankfurt
+    buildCommand: bash ./build.sh
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    disk:
+      name: soma-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: soma-db
-          property: connectionString
+        value: sqlite:////data/soma.db
       - key: SECRET_KEY
         generateValue: true
       - key: PYTHON_VERSION

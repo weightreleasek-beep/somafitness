@@ -6,8 +6,8 @@ function Training() {
       <div className="container">
         <div className="training-layout">
           <div className="training-images">
-            <img src="/images/studio-5.png" alt="Weight training equipment at SOMA" className="training-img-main" />
-            <img src="/images/studio-6.png" alt="SOMA studio overview" className="training-img-secondary" />
+            <img src="/images/studio-gym.png" alt="Χώρος ενδυνάμωσης στο SOMA" className="training-img-main" />
+            <img src="/images/studio-pilates-wide.png" alt="SOMA studio overview" className="training-img-secondary" />
           </div>
           <div className="training-content">
             <h2 className="section-title">Personal & Semi-Personal Training</h2>

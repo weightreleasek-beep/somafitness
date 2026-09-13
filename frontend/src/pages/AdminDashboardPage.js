@@ -63,11 +63,25 @@ function AdminDashboardPage() {
 
   const toggleAttendance = async (bookingId) => {
     const res = await authFetch(`/api/admin/toggle-attendance/${bookingId}`, { method: 'POST' });
-    if (res) {
+    if (res && res.ok) {
       setBookings((prev) =>
         prev.map((b) => b.id === bookingId ? { ...b, is_confirmed_attendance: !b.is_confirmed_attendance } : b)
       );
       fetchSessions();
+    }
+  };
+
+  const setApproval = async (bookingId, action) => {
+    if (action === 'reject' && !window.confirm('Απόρριψη κράτησης; Ο πελάτης θα ενημερωθεί με email.')) return;
+    const res = await authFetch(`/api/admin/bookings/${bookingId}/${action}`, { method: 'POST' });
+    if (res) {
+      const data = await res.json();
+      if (res.ok) {
+        if (selectedSession) fetchBookings(selectedSession.id);
+        fetchSessions();
+      } else {
+        window.alert(data.detail || 'Σφάλμα ενημέρωσης κράτησης.');
+      }
     }
   };
 
@@ -212,6 +226,9 @@ function AdminDashboardPage() {
                       <div className="admin-session-stats">
                         <span>{s.booked_seats}/{s.max_seats} κρατήσεις</span>
                         <span>{s.confirmed_count} παρόντες</span>
+                        {s.pending_count > 0 && (
+                          <span className="admin-pending-badge">{s.pending_count} εκκρεμείς</span>
+                        )}
                       </div>
                       <div className="admin-session-bar">
                         <div className="admin-session-bar-fill" style={{ width: `${(s.booked_seats / s.max_seats) * 100}%` }}></div>
@@ -239,32 +256,58 @@ function AdminDashboardPage() {
                     {formatDate(selectedSession.date)} | {selectedSession.start_time} - {selectedSession.end_time} |
                     Μέγ. θέσεις: {selectedSession.max_seats}
                   </p>
+                  {bookings.some((b) => (b.approval_status || 'pending') === 'pending') && (
+                    <p className="admin-bookings-hint">Αποδοχή ή απόρριψη για να καθορίσετε ποιοι μπαίνουν στο τμήμα.</p>
+                  )}
                   {bookings.length === 0 ? (
                     <p className="admin-empty">Δεν υπάρχουν κρατήσεις.</p>
                   ) : (
                     <div className="admin-bookings-list">
-                      {bookings.map((b) => (
-                        <div key={b.id} className={`admin-booking-row ${b.is_confirmed_attendance ? 'confirmed' : ''}`}>
-                          <button
-                            className={`attendance-check ${b.is_confirmed_attendance ? 'checked' : ''}`}
-                            onClick={() => toggleAttendance(b.id)}
-                          >
-                            {b.is_confirmed_attendance ? (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            ) : null}
-                          </button>
+                      {bookings.map((b) => {
+                        const status = b.approval_status || 'pending';
+                        return (
+                        <div key={b.id} className={`admin-booking-row ${status} ${b.is_confirmed_attendance ? 'confirmed' : ''}`}>
+                          {status === 'approved' ? (
+                            <button
+                              className={`attendance-check ${b.is_confirmed_attendance ? 'checked' : ''}`}
+                              onClick={() => toggleAttendance(b.id)}
+                            >
+                              {b.is_confirmed_attendance ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              ) : null}
+                            </button>
+                          ) : (
+                            <span className={`approval-status-badge ${status}`}>
+                              {status === 'pending' ? 'Εκκρεμεί' : 'Απορρίφθηκε'}
+                            </span>
+                          )}
                           <div className="booking-info">
                             <strong>{b.name}</strong>
                             <span>{b.email}</span>
                             {b.phone && <span>{b.phone}</span>}
                           </div>
-                          <div className="booking-code">
-                            {b.confirmation_code}
+                          {status === 'approved' && (
+                            <div className="booking-code">
+                              {b.confirmation_code}
+                            </div>
+                          )}
+                          <div className="booking-approval-actions">
+                            {status !== 'approved' && (
+                              <button className="approval-btn accept" onClick={() => setApproval(b.id, 'approve')}>
+                                Αποδοχή
+                              </button>
+                            )}
+                            {status !== 'rejected' && (
+                              <button className="approval-btn reject" onClick={() => setApproval(b.id, 'reject')}>
+                                Απόρριψη
+                              </button>
+                            )}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </>

@@ -29,7 +29,7 @@ function HomePage() {
           <div className="preview-grid">
             <Link to="/pilates" className="preview-card">
               <div className="preview-card-image">
-                <img src="/images/studio-3.png" alt="Pilates Reformer" />
+                <img src="/images/studio-pilates-wide.png" alt="Pilates Reformer" />
               </div>
               <div className="preview-card-content">
                 <h3>Pilates & Αποκατάσταση</h3>
@@ -39,7 +39,7 @@ function HomePage() {
             </Link>
             <Link to="/training" className="preview-card">
               <div className="preview-card-image">
-                <img src="/images/studio-5.png" alt="Personal Training" />
+                <img src="/images/studio-gym.png" alt="Personal Training" />
               </div>
               <div className="preview-card-content">
                 <h3>Personal Training</h3>
@@ -49,7 +49,7 @@ function HomePage() {
             </Link>
             <Link to="/nutrition" className="preview-card">
               <div className="preview-card-image">
-                <img src="/images/studio-6.png" alt="Διατροφή" />
+                <img src="/images/studio-pilates-room.png" alt="Διατροφή" />
               </div>
               <div className="preview-card-content">
                 <h3>Διατροφολογικό Τμήμα</h3>
@@ -75,7 +75,7 @@ function HomePage() {
               <Link to="/about" className="btn btn-primary">Γνωρίστε μας</Link>
             </div>
             <div className="home-why-us-images">
-              <img src="/images/studio-4.png" alt="SOMA studio" />
+              <img src="/images/studio-pilates-wide.png" alt="SOMA studio" />
             </div>
           </div>
         </div>

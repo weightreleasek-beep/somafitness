@@ -5,6 +5,13 @@ from database import Base
 import enum
 
 
+def occupies_seat(booking) -> bool:
+    """Pending and approved bookings hold a seat; rejected/cancelled do not."""
+    if booking.is_cancelled:
+        return False
+    return getattr(booking, "approval_status", "pending") != "rejected"
+
+
 class ContactInquiry(Base):
     __tablename__ = "contact_inquiries"
 
@@ -49,7 +56,7 @@ class ClassSession(Base):
 
     @property
     def booked_count(self):
-        return len([b for b in self.bookings if not b.is_cancelled])
+        return len([b for b in self.bookings if occupies_seat(b)])
 
     @property
     def available_seats(self):
@@ -67,6 +74,7 @@ class Booking(Base):
     confirmation_code = Column(String(4), nullable=False)
     is_confirmed_attendance = Column(Boolean, default=False)
     is_cancelled = Column(Boolean, default=False)
+    approval_status = Column(String(20), nullable=False, default="pending")  # pending, approved, rejected
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     session = relationship("ClassSession", back_populates="bookings")

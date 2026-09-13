@@ -66,10 +66,10 @@ function WhyUsPage() {
         <div className="container">
           <h2 className="section-title" style={{ marginBottom: 40 }}>Ο Χώρος μας</h2>
           <div className="page-gallery page-gallery-3">
-            <img src="/images/studio-4.png" alt="SOMA studio χώρος" />
-            <img src="/images/studio-8.png" alt="SOMA studio εξοπλισμός" />
-            <img src="/images/studio-1.png" alt="SOMA εξωτερικός χώρος" />
-            <img src="/images/studio-2.png" alt="SOMA πρόσοψη" />
+            <img src="/images/studio-pilates-wide.png" alt="SOMA studio χώρος Pilates" />
+            <img src="/images/studio-pilates-tower.png" alt="SOMA Cadillac Pilates" />
+            <img src="/images/studio-gym.png" alt="SOMA χώρος ενδυνάμωσης" />
+            <img src="/images/studio-pilates-room.png" alt="SOMA αίθουσα Pilates" />
           </div>
         </div>
       </section>
